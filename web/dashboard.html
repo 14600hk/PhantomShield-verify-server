@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phantom Shield — 管理面板</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Phantom Shield Admin</h1>
+        <div class="sub-title">验证服务管理面板</div>
+      </div>
+      <div class="header-right">
+        <span class="user-tag" id="who">…</span>
+        <a class="btn btn-outline btn-sm" href="/panel">用户页</a>
+        <button class="btn btn-outline btn-sm" id="logout-btn">退出</button>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="stats">
+      <div class="stat-card"><div class="value" id="st-users">–</div><div class="label">注册用户</div></div>
+      <div class="stat-card"><div class="value" id="st-online">–</div><div class="label">在线会话</div></div>
+      <div class="stat-card"><div class="value" id="st-cards">–</div><div class="label">未使用卡密</div></div>
+      <div class="stat-card"><div class="value" id="st-banned">–</div><div class="label">封禁账号</div></div>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab active" data-tab="users">用户管理</button>
+      <button class="tab" data-tab="cards">卡密</button>
+      <button class="tab" data-tab="sessions">在线会话</button>
+      <button class="tab" data-tab="settings">公告 / 设置</button>
+      <button class="tab" data-tab="logs">日志</button>
+    </div>
+
+    <!-- ==================== users ==================== -->
+    <div class="section" id="tab-users">
+      <div class="section-head">
+        <div class="section-title">用户管理</div>
+        <div style="display:flex;gap:8px">
+          <input id="user-search" placeholder="搜索用户名…" style="
+            padding:8px 12px;background:#141416;border:1px solid rgba(255,255,255,0.08);
+            border-radius:8px;color:#fff;font-size:0.85rem;width:180px">
+          <button class="btn btn-primary btn-sm" id="btn-create-user">+ 新建用户</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead><tr>
+            <th>ID</th><th>用户名</th><th>QQ</th><th>订阅到期</th><th>状态</th><th>主机</th><th>最后登录</th><th>操作</th>
+          </tr></thead>
+          <tbody id="users-body"><tr><td colspan="8" style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== cards ==================== -->
+    <div class="section" id="tab-cards" style="display:none">
+      <div class="section-head">
+        <div class="section-title">卡密管理</div>
+        <button class="btn btn-primary btn-sm" id="btn-gen-card">+ 生成卡密</button>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead><tr><th>卡密</th><th>天数</th><th>状态</th><th>使用者</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="cards-body"><tr><td colspan="6" style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== sessions ==================== -->
+    <div class="section" id="tab-sessions" style="display:none">
+      <div class="section-head">
+        <div class="section-title">在线会话</div>
+        <button class="btn btn-outline btn-sm" id="btn-refresh-sessions">刷新</button>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead><tr><th>用户</th><th>IP</th><th>版本</th><th>QQ</th><th>最后心跳</th><th>操作</th></tr></thead>
+          <tbody id="sessions-body"><tr><td colspan="6" style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== settings ==================== -->
+    <div class="section" id="tab-settings" style="display:none">
+      <div class="section-title">服务开关</div>
+      <div class="setting-row">
+        <div><div class="setting-label">维护模式</div><div class="setting-desc">开启后客户端登录提示“软件维护中”（code 9）</div></div>
+        <label class="toggle"><input type="checkbox" id="set-maint"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">停止服务</div><div class="setting-desc">开启后登录返回停止服务，在线客户端下次心跳退出</div></div>
+        <label class="toggle"><input type="checkbox" id="set-stopped"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div style="flex:1">
+          <div class="setting-label">最低客户端版本</div>
+          <div class="setting-desc">留空表示不校验版本；填写后不匹配的客户端心跳阶段收到“版本过旧”</div>
+          <div class="field" style="margin-top:10px"><input id="set-minver" placeholder="例如 1.0"></div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div style="flex:1">
+          <div class="setting-label">公告</div>
+          <div class="setting-desc">展示在用户自助页</div>
+          <div class="field" style="margin-top:10px"><textarea id="set-notice"></textarea></div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btn-save-settings">保存设置</button>
+    </div>
+
+    <div class="section" id="tab-cloud" style="display:none">
+      <div class="section-head">
+        <div class="section-title">云常量</div>
+        <button class="btn btn-primary btn-sm" id="btn-cloud-add">+ 添加云常量</button>
+      </div>
+      <div class="desc">云常量按“角色名字符串的 Java hashCode”下发，受保护 jar 通过 getCloudConstant(hash, index) 读取。</div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead><tr><th>角色名</th><th>hash</th><th>常量列表</th><th>操作</th></tr></thead>
+          <tbody id="cloud-body"><tr><td colspan="4" style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== logs ==================== -->
+    <div class="section" id="tab-logs" style="display:none">
+      <div class="section-head">
+        <div class="section-title">日志</div>
+        <button class="btn btn-outline btn-sm" id="btn-refresh-logs">刷新</button>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead><tr><th>时间</th><th>类型</th><th>用户</th><th>IP</th><th>详情</th></tr></thead>
+          <tbody id="logs-body"><tr><td colspan="5" style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== modals ==================== -->
+  <div class="modal-overlay" id="modal-create">
+    <div class="modal-box">
+      <div class="modal-title">新建用户</div>
+      <div class="field"><label>用户名</label><input id="nu-username" placeholder="3-20 位"></div>
+      <div class="field"><label>密码</label><input id="nu-password" type="password" placeholder="至少 6 位"></div>
+      <div class="field-row">
+        <div class="field"><label>QQ（可选）</label><input id="nu-qq"></div>
+        <div class="field"><label>订阅天数（可选）</label><input id="nu-days" type="number" min="0" placeholder="30"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-create')">取消</button>
+        <button class="btn btn-primary" id="nu-submit">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-expiry">
+    <div class="modal-box">
+      <div class="modal-title">设置到期时间 — <span id="exp-user"></span></div>
+      <div class="field">
+        <label>方式一：延长天数</label>
+        <input id="exp-days" type="number" placeholder="例如 30">
+        <div class="hint">从当前到期时间（若未过期）往后加</div>
+      </div>
+      <div class="field">
+        <label>方式二：直接指定日期</label>
+        <input id="exp-date" placeholder="2077-01-01 00:00:00">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-expiry')">取消</button>
+        <button class="btn btn-primary" id="exp-submit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-passwd">
+    <div class="modal-box">
+      <div class="modal-title">重置密码 — <span id="pw-user"></span></div>
+      <div class="field"><label>新密码</label><input id="pw-new" type="password" placeholder="至少 6 位"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-passwd')">取消</button>
+        <button class="btn btn-primary" id="pw-submit">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-gencard">
+    <div class="modal-box">
+      <div class="modal-title">生成卡密</div>
+      <div class="field-row">
+        <div class="field"><label>前缀</label><input id="gc-prefix" value="PS"></div>
+        <div class="field"><label>数量</label><input id="gc-amount" type="number" value="10" min="1" max="500"></div>
+        <div class="field"><label>天数</label><input id="gc-days" type="number" value="30" min="1"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-gencard')">取消</button>
+        <button class="btn btn-primary" id="gc-submit">生成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-cloudadd">
+    <div class="modal-box">
+      <div class="modal-title">添加云常量</div>
+      <div class="field">
+        <label>角色名（自动计算 Java hashCode）</label>
+        <input id="ca-source" placeholder="例如 授权验证用户组">
+        <div class="hint" id="ca-hash-preview">hash: —</div>
+      </div>
+      <div class="field">
+        <label>常量内容（每行一条，客户端按 index 取用）</label>
+        <textarea id="ca-strings" placeholder="第一行 = index 0&#10;第二行 = index 1"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-cloudadd')">取消</button>
+        <button class="btn btn-primary" id="ca-submit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/md5.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

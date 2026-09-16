@@ -1,0 +1,11 @@
+--- Internals.java (baseline)
++++ Internals.java (modified)
+@@ -16,7 +16,7 @@
+     }
+ 
+     public static byte[] publicKey() {
+-        return Base64.getDecoder().decode("MCowBQYDK2VwAyEAfZU0fSt8t0DWwlXSX4hF/TKN7NW+Z9CYy8/m3/Q5AAs=");
++        return Base64.getDecoder().decode("MCowBQYDK2VwAyEAaHO7D2aH7tux7YXwmOElkbTT0kRZc16PilTyN2qbUEY=");
+     }
+ 
+     public static long softwareId() {

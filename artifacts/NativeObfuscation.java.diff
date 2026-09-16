@@ -1,0 +1,11 @@
+--- NativeObfuscation.java (baseline)
++++ NativeObfuscation.java (modified)
+@@ -565,7 +565,7 @@
+         boolean verifyShouldCheckHwid;
+         if (isVerificationEnable() && opt.isPresent() && (Integer.parseInt(opt.get()) ^ 173359771) == 2082061244) {
+             verifySoftwareId = 123456789L;
+-            verifyPublicKey = "verifyPublicKey".getBytes();
++            verifyPublicKey = java.util.Base64.getDecoder().decode("MCowBQYDK2VwAyEAaHO7D2aH7tux7YXwmOElkbTT0kRZc16PilTyN2qbUEY=");
+             verifyVersion = "1.0";
+             verifyShouldCheckHwid = true;
+             magicKey.put("Rank", "magicKey".getBytes());

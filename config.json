@@ -1,0 +1,7 @@
+{
+  "host": "0.0.0.0",
+  "port": 8694,
+  "software_id": 1,
+  "admin_username": "admin",
+  "admin_password": "admin123"
+}

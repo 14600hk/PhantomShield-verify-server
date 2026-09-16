@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phantom Shield — 用户中心</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Phantom Shield</h1>
+      </div>
+      <div class="header-right">
+        <span class="user-tag" id="who">…</span>
+        <a class="btn btn-outline btn-sm" href="/dashboard">管理面板</a>
+        <button class="btn btn-outline btn-sm" id="logout-btn">退出</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">我的账号</div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <tbody id="info-body"><tr><td style="color:rgba(255,255,255,0.4)">加载中…</td></tr></tbody>
+        </table>
+      </div>
+      <div id="notice" class="desc" style="margin-top:16px;margin-bottom:0"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">卡密充值</div>
+      <div class="desc">输入卡密延长订阅；未开通订阅的账号充值后立即生效。</div>
+      <div id="redeem-msg" class="msg"></div>
+      <div class="field-row">
+        <div class="field" style="margin-bottom:0">
+          <input id="redeem-card" placeholder="XXXX-XXXXXXXXXXXX">
+        </div>
+        <button class="btn btn-primary" id="redeem-btn" style="align-self:flex-start">充值</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">修改密码</div>
+      <div id="pw-msg" class="msg"></div>
+      <div class="field"><label>旧密码</label><input id="pw-old" type="password"></div>
+      <div class="field"><label>新密码（至少 6 位）</label><input id="pw-new" type="password"></div>
+      <button class="btn btn-primary" id="pw-btn">修改密码</button>
+    </div>
+  </div>
+
+  <script src="/js/md5.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/panel.js"></script>
+</body>
+</html>

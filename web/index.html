@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phantom Shield — 验证中心</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+
+      <!-- ==================== login view (#/login) ==================== -->
+      <div id="view-login">
+        <div class="auth-title">Phantom Shield</div>
+        <div id="login-msg" class="msg"></div>
+        <div class="field">
+          <label>用户名</label>
+          <input id="login-username" type="text" autocomplete="username" placeholder="username">
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <input id="login-password" type="password" autocomplete="current-password" placeholder="password">
+        </div>
+        <button id="login-btn" class="btn btn-primary btn-block">登 录</button>
+        <div class="auth-switch">还没有账号？<a href="#/register">注册</a></div>
+      </div>
+
+      <!-- ==================== register view (#/register) ==================== -->
+      <div id="view-register" style="display:none">
+        <div class="auth-title">创建账号</div>
+        <div class="auth-sub">注册 Phantom Shield 客户端账号</div>
+        <div id="reg-msg" class="msg"></div>
+        <div class="field">
+          <label>用户名</label>
+          <input id="reg-username" type="text" placeholder="3-20 位字母 / 数字 / 下划线">
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <input id="reg-password" type="password" placeholder="至少 6 位">
+        </div>
+        <div class="field">
+          <label>确认密码</label>
+          <input id="reg-password2" type="password" placeholder="再输入一次">
+        </div>
+        <div class="field">
+          <label>QQ 号（可选）</label>
+          <input id="reg-qq" type="text" placeholder="用于联系与找回">
+        </div>
+        <button id="reg-btn" class="btn btn-primary btn-block">注 册</button>
+        <div class="auth-switch">已有账号？<a href="#/login">登录</a></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/md5.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function route() {
+      const hash = window.location.hash || '#/login';
+      const isReg = hash.startsWith('#/register');
+      $('view-login').style.display = isReg ? 'none' : '';
+      $('view-register').style.display = isReg ? '' : 'none';
+      document.title = isReg ? 'Phantom Shield — 注册' : 'Phantom Shield — 验证中心';
+    }
+    window.addEventListener('hashchange', route);
+    route();
+
+    async function tryLogin() {
+      const username = $('login-username').value.trim();
+      const password = $('login-password').value;
+      if (!username || !password) return showMsg('login-msg', '请输入用户名和密码', false);
+      $('login-btn').disabled = true;
+      try {
+        const res = await api('login', { username, password: md5(password) });
+        if (!res.success) return showMsg('login-msg', res.message || '登录失败', false);
+        window.location.href = res.is_admin ? '/dashboard' : '/panel';
+      } catch (e) {
+        showMsg('login-msg', '网络错误', false);
+      } finally {
+        $('login-btn').disabled = false;
+      }
+    }
+    $('login-btn').addEventListener('click', tryLogin);
+    $('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+    $('login-username').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+    async function tryRegister() {
+      const username = $('reg-username').value.trim();
+      const password = $('reg-password').value;
+      const password2 = $('reg-password2').value;
+      const qq = $('reg-qq').value.trim();
+      if (username.length < 3 || username.length > 20) return showMsg('reg-msg', '用户名需 3-20 位', false);
+      if (password.length < 6) return showMsg('reg-msg', '密码至少 6 位', false);
+      if (password !== password2) return showMsg('reg-msg', '两次密码不一致', false);
+      if (qq && !/^\d{5,11}$/.test(qq)) return showMsg('reg-msg', 'QQ 号格式不正确', false);
+      $('reg-btn').disabled = true;
+      try {
+        const res = await api('register', { username, password: md5(password), qq });
+        if (!res.success) return showMsg('reg-msg', res.message || '注册失败', false);
+        showMsg('reg-msg', '注册成功，正在跳转登录…', true);
+        setTimeout(() => { window.location.hash = '#/login'; }, 1200);
+      } catch (e) {
+        showMsg('reg-msg', '网络错误', false);
+      } finally {
+        $('reg-btn').disabled = false;
+      }
+    }
+    $('reg-btn').addEventListener('click', tryRegister);
+    $('reg-qq').addEventListener('keydown', e => { if (e.key === 'Enter') tryRegister(); });
+
+    // already logged in? jump straight to the right panel.
+    // redirect401=false: staying on the login page is the expected outcome for
+    // anonymous visitors -- redirecting would reload this page forever.
+    api('me', {}, false).then(me => {
+      if (me.success && me.data) {
+        window.location.href = me.data.is_admin ? '/dashboard' : '/panel';
+      }
+    }).catch(() => {});
+  </script>
+</body>
+</html>

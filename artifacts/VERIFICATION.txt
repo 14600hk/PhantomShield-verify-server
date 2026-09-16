@@ -1,0 +1,40 @@
+Phantom Shield client patch verification
+============================================================
+
+ed25519 seed  : D:\Project\OpenPhantomShield-main\verify-server\keys\ed25519_seed.bin
+public (raw)  : 6873bb0f6687eedbb1ed85f098e12591b4d3d24459735e8f8a54f2376a9b5046
+public (SPKI) : MCowBQYDK2VwAyEAaHO7D2aH7tux7YXwmOElkbTT0kRZc16PilTyN2qbUEY=
+
+--- Internals (D:\Project\OpenPhantomShield-main\phantomshield-internals\src\main\java\tech\skidonion\verification\utils\Internals.java) ---
+changed : public key constant replaced (re-patch)
+[BASELINE] javac pristine Internals.java
+  exit: 0  output: (clean)
+[MODIFIED] javac patched Internals.java
+  exit: 0  output: (clean)
+[ROLLBACK] Internals: scratch copy restored identical = True
+
+--- NativeObfuscation (D:\Project\OpenPhantomShield-main\phantomshield-obfuscator\src\main\java\tech\skidonion\obfuscator\transformer\impl\NativeObfuscation.java) ---
+changed : injected verifyPublicKey -> real SPKI
+[MODIFIED] NativeObfuscation.java contains new SPKI: True (compile validated by gradle build)
+[ROLLBACK] NativeObfuscation: scratch copy restored identical = True
+
+RESULT: ALL CHECKS PASSED - patches applied, rollback verified
+
+
+[BUGFIX 2026-09-16] fatal error #s (login-stage Ed25519 verification failure)
+  root cause : server/ed25519.py reduced the RFC 8032 r/h scalars modulo the
+               field prime q (2^255-19) instead of the group order l; signatures
+               were self-consistent with the bundled verifier but rejected by
+               every independent Ed25519 implementation (incl. the Java client).
+  detection  : cross-checked signatures against python-cryptography -> INVALID;
+               RFC 8032 test vectors 1+2 -> sig mismatch.
+  fix        : _sha512_modq -> _sha512_modl (mod _L); client public key unchanged
+               (key derivation was already correct).
+  verification:
+    - RFC 8032 vector 1 & 2 : pub=True sig=True
+    - cryptography cross-check of live keypair signature : VALID
+    - python test_client.py : 38 passed, 0 failed
+    - REAL protected jar (login-demo-protected.jar, Themida-wrapped, dump-injected
+      client): login result code = 0, uid resolved, cloud constant decrypted,
+      server logs show POST /api/verify/login + POST /api/verify/heartbeat both
+      processed.
